@@ -1,23 +1,22 @@
 import { products } from '@wix/stores';
 import styles from './product-images.module.scss';
 import cx from 'classnames';
-import { getImageHttpUrl } from '../../../api/wix-image';
 
 export function ProductImages(props: {
-    mainImage?: products.MediaItem;
-    images?: products.MediaItem[];
+    name?: string;
+    imageUrl?: string;
     className?: string;
 }) {
-    const restImages = props.images?.filter((img) => img._id !== props.mainImage?._id);
+    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
     return (
         <div className={cx(styles.root, props.className)}>
             <img
-                src={props.mainImage?.image?.url}
-                alt={props.mainImage?.title}
+                src={`${apiBaseUrl}/api/v1/public/product/image/${props.imageUrl}`}
+                alt={props.name}
                 className={styles.img}
                 data-testid="product-img"
             />
-            <div className={styles['image-grid']}>
+            {/* <div className={styles['image-grid']}>
                 {restImages?.map((item, index) => {
                     return (
                         <img
@@ -27,7 +26,7 @@ export function ProductImages(props: {
                         />
                     );
                 })}
-            </div>
+            </div> */}
         </div>
     );
 }

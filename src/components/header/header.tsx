@@ -2,18 +2,39 @@ import classNames from 'classnames';
 import styles from './header.module.scss';
 import { ROUTES } from '../../router/config';
 import { Cart } from '../cart/cart';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import CommonStyles_module from '../../styles/common-styles.module.scss';
+import DropdownMenu from './menu/dropdown-menu';
+import { useAuth } from '/src/api/auth-context';
+import { useEffect } from 'react';
 
 export interface HeaderProps {
     className?: string;
 }
 
 export const Header = ({ className }: HeaderProps) => {
+    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
+    const { isLoggedIn, logout} = useAuth();
+    const navigate = useNavigate();
+
+    const handleLogout = () => {
+        logout();
+        navigate(ROUTES.home.to());
+    };
+
+    useEffect(() => {
+        console.log(isLoggedIn);
+    },[]);
+
     return (
         <div className={classNames(styles.root, className)}>
             <Link to="/" className={styles.logo}>
-                LOGO
+                <img
+                    src={`${apiBaseUrl}/api/v1/public/product/image/logofinal-lelabo.png`}
+                    alt=""
+                    width=""
+                    height="70"
+                />
             </Link>
             <div className={styles.menu}>
                 <Link
@@ -22,6 +43,7 @@ export const Header = ({ className }: HeaderProps) => {
                 >
                     Home
                 </Link>
+                <DropdownMenu />
                 <Link
                     to={ROUTES.products.to()}
                     className={classNames(CommonStyles_module.secondaryButton, styles.menuButton)}
@@ -34,6 +56,29 @@ export const Header = ({ className }: HeaderProps) => {
                 >
                     About
                 </Link>
+                {isLoggedIn ? (
+                    <><Link
+                        to={ROUTES.profile.to()}
+                        className={classNames(
+                            CommonStyles_module.secondaryButton,
+                            styles.menuButton
+                        )}
+                    >
+                        Profile
+                    </Link>
+                    <button onClick={handleLogout}>Logout</button></>
+                ) : (
+                    <Link
+                        to={ROUTES.login.to()}
+                        className={classNames(
+                            CommonStyles_module.secondaryButton,
+                            styles.menuButton
+                        )}
+                    >
+                        Login
+                    </Link>
+                )}
+
                 <Cart className={styles.menuButton} />
             </div>
         </div>

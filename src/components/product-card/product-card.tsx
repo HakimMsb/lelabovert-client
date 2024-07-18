@@ -8,7 +8,7 @@ export type GalleryCardProps = {
     name: string;
     imageUrl?: string;
     className?: string;
-    price?: products.PriceData;
+    price?: number;
 } & React.HTMLAttributes<HTMLDivElement>;
 
 export const ProductCard = ({
@@ -18,17 +18,20 @@ export const ProductCard = ({
     price,
     ...divProps
 }: GalleryCardProps) => {
+
+    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
+    
     return (
         <div className={classNames(styles.root, className)} {...divProps}>
             {imageUrl ? (
-                <img src={imageUrl} alt={name} className={styles.image} data-testid="product-img" />
+                <img src={`${apiBaseUrl}/api/v1/public/product/image/${imageUrl}`} alt={name} className={styles.image} data-testid="product-img" />
             ) : (
                 <img src={noImage} alt={name} className={styles.image} data-testid="product-img" />
             )}
             <div className={styles.cardContent}>
                 <p className={styles.description}>{name}</p>
-                {price?.formatted && (
-                    <p className={CommonStyles_module.price}>{price.formatted.price}</p>
+                {price && (
+                    <p className={CommonStyles_module.price}>{price}</p>
                 )}
             </div>
         </div>

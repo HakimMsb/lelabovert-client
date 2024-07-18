@@ -8,6 +8,7 @@
     "build": "tsc && vite build",
     "preview": "vite preview"
   },
+  "proxy": "http://localhost:8443",
   "dependencies": {
     "@radix-ui/react-icons": "^1.3.0",
     "@types/node": "^20.12.13",
@@ -15,10 +16,13 @@
     "@wix/redirects": "^1.0.47",
     "@wix/sdk": "^1.9.6",
     "@wix/stores": "^1.0.121",
+    "axios": "^1.7.2",
     "classnames": "^2.5.1",
     "js-cookie": "^3.0.5",
+    "jwt-decode": "^4.0.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-hook-form": "^7.52.1",
     "react-router-dom": "^6.23.1",
     "swr": "^2.2.5"
   },

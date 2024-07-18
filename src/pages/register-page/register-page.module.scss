@@ -1,0 +1,8 @@
+@import '../login-page/login-page.module.scss'; // Import the shared styles
+
+// Extend or override styles as needed
+.registerForm {
+    @extend .loginForm;
+
+    // Any additional or overriding styles for register form
+}

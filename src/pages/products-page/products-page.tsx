@@ -1,10 +1,9 @@
 import classNames from 'classnames';
 import styles from './products-page.module.scss';
-import { Link } from 'react-router-dom';
-import { ROUTES } from '../../router/config';
+import { Link, useParams } from 'react-router-dom';
+import { ROUTES, RouteParams } from '../../router/config';
 import { ProductCard } from '../../components/product-card/product-card';
-import { useProducts } from '../../api/api-hooks';
-import { getImageHttpUrl } from '../../api/wix-image';
+import { useProducts } from '../../api/api-client-hooks';
 import commonStyles from '../../styles/common-styles.module.scss';
 
 export interface ProductsPageProps {
@@ -12,32 +11,31 @@ export interface ProductsPageProps {
 }
 
 export const ProductsPage = ({ className }: ProductsPageProps) => {
-    const { data: myProducts, isLoading } = useProducts();
+    const { slug: categorySlug } = useParams<RouteParams['/category/:slug']>()
+    const { products, categoryName, loading, error } = useProducts(categorySlug);
 
-    if (!myProducts && isLoading) {
+    if (loading) {
         return <div className={commonStyles.loading}>Loading...</div>;
+    }
+    if (error) {
+        return <div>Error: {error.message}</div>;
     }
 
     return (
         <div className={classNames(styles.root, className)}>
-            <h1 className={styles.title}>All Products</h1>
+            <h1 className={styles.title}>{categoryName ? `Products in ${categoryName}` : 'All Products'}</h1>
             <div className={styles.gallery}>
-                {myProducts?.map(
-                    (item) =>
-                        item.slug &&
-                        item.name && (
-                            <Link to={ROUTES.product.to(item.slug)} key={item.slug}>
-                                <ProductCard
-                                    imageUrl={getImageHttpUrl(
-                                        item.media?.items?.at(0)?.image?.url,
-                                        240
-                                    )}
-                                    name={item.name}
-                                    price={item.price ?? undefined}
-                                    className={styles.productCard}
-                                />
-                            </Link>
-                        )
+                {products?.map((product) =>
+                    product.name && product.slug ? (
+                        <Link to={ROUTES.product.to(product.slug)} key={product.id}>
+                            <ProductCard
+                                imageUrl={product?.image}
+                                name={product.name}
+                                price={product.price ?? undefined}
+                                className={styles.productCard}
+                            />
+                        </Link>
+                    ) : null
                 )}
             </div>
         </div>
