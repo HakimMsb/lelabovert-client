@@ -2,10 +2,9 @@ import axios from 'axios';
 import { AccountControllerApi, AlgeriaCitiesControllerApi, AuthenticationControllerApi, CartControllerApi, CategoryControllerApi, CustomerControllerApi, ProductControllerApi } from './lelabovert-api-generated-client/api';
 import { BASE_PATH, BaseAPI } from './lelabovert-api-generated-client/base';
 import { jwtDecode } from 'jwt-decode';
-import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '../router/config';
 
-let jwtToken: string | null = localStorage.getItem('jwt');
+let token: string | null = localStorage.getItem('jwt');
 
 export interface JwtTokenPayload {
     isLoggedOut: boolean;
@@ -19,13 +18,18 @@ const axiosInstance = axios.create({
 
 axiosInstance.interceptors.request.use(
     (config) => {
-        if (jwtToken) {
-            const decodedJwtToken = jwtDecode<JwtTokenPayload>(jwtToken);
-            if(decodedJwtToken.isLoggedOut){
+        const token = localStorage.getItem('jwt');
+        if (token) {
+            const decodedJwtToken = jwtDecode<JwtTokenPayload>(token);
+            const currentTime = Date.now(); 
+
+            // Check if the token is expired
+            if (decodedJwtToken.expiration < currentTime) {
+                // Token is expired, remove it and redirect to the home page
                 localStorage.removeItem('jwt');
                 window.location.href = ROUTES.home.to();
             }else{
-                config.headers['Authorization'] = `Bearer ${jwtToken}`;
+                config.headers['Authorization'] = `Bearer ${token}`;
             }
         }
         return config;
@@ -35,14 +39,14 @@ axiosInstance.interceptors.request.use(
     }
 );
 
-export const setJwtToken = (token: string) => {
-    jwtToken = token;
-    localStorage.setItem('jwt', token);
+export const setJwtToken = (jwtToken: string) => {
+    localStorage.setItem('jwt', jwtToken);
+    token = jwtToken;
 };
 
 export const removeJwtToken = () => {
-    jwtToken = null;
     localStorage.removeItem('jwt');
+    token = null;
 };
 
 export const authenticationApiClient = new AuthenticationControllerApi(undefined, undefined, axiosInstance);

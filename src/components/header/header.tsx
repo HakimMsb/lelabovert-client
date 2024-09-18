@@ -6,15 +6,13 @@ import { Link, useNavigate } from 'react-router-dom';
 import CommonStyles_module from '../../styles/common-styles.module.scss';
 import DropdownMenu from './menu/dropdown-menu';
 import { useAuth } from '/src/api/auth-context';
-import { useEffect } from 'react';
 
 export interface HeaderProps {
     className?: string;
 }
 
 export const Header = ({ className }: HeaderProps) => {
-    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
-    const { isLoggedIn, logout} = useAuth();
+    const { isLoggedIn, logout } = useAuth();
     const navigate = useNavigate();
 
     const handleLogout = () => {
@@ -22,15 +20,11 @@ export const Header = ({ className }: HeaderProps) => {
         navigate(ROUTES.home.to());
     };
 
-    useEffect(() => {
-        console.log(isLoggedIn);
-    },[]);
-
     return (
         <div className={classNames(styles.root, className)}>
             <Link to="/" className={styles.logo}>
                 <img
-                    src={`${apiBaseUrl}/api/v1/public/product/image/logofinal-lelabo.png`}
+                    src="/src/assets/img/logofinal-lelabo.png"
                     alt=""
                     width=""
                     height="70"

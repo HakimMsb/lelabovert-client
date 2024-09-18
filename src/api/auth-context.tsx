@@ -10,66 +10,94 @@ interface AuthContextProps {
     login: (email: string, password: string) => Promise<void>;
     logout: () => Promise<void>;
     register: (email: string, password: string) => Promise<void>;
-  }
-  
-  const AuthContext = createContext<AuthContextProps | undefined>(undefined);
-  
-  const AuthProvider = ({ children }: { children: ReactNode }) => {
+}
+
+const AuthContext = createContext<AuthContextProps | undefined>(undefined);
+
+const AuthProvider = ({ children }: { children: ReactNode }) => {
     const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() => !!localStorage.getItem('jwt'));
     const [userProfile, setUserProfile] = useState<AccountDto | null>(null);
 
-    useEffect(() => {
-      const validateToken = async () => {
+    // Function to validate the token and handle expiration
+    const validateToken = async () => {
         const token = localStorage.getItem('jwt');
         if (token) {
             const decodedToken = jwtDecode<JwtTokenPayload>(token);
-            if (decodedToken.isLoggedOut || decodedToken.expiration * 1000 < Date.now()) {
-                setIsLoggedIn(false);
+            // Check if the token has expired (expiration in seconds, so multiply by 1000)
+            if (decodedToken.expiration * 1000 < Date.now()) {
                 localStorage.removeItem('jwt');
+                setIsLoggedIn(false); // Trigger logout if token is expired
             } else {
-                const userProfile = await accountApiClient.getAuthenticatedAccount();
-                setUserProfile(userProfile.data);
+                try {
+                    // Fetch the user profile if the token is valid
+                    const userProfile = await accountApiClient.getAuthenticatedAccount();
+                    setUserProfile(userProfile.data);
+                } catch (error) {
+                    console.error('Failed to fetch user profile:', error);
+                    localStorage.removeItem('jwt'); // Logout if API call fails
+                    setIsLoggedIn(false);
+                }
             }
         }
     };
 
-    if (isLoggedIn) {
-        validateToken();
-    }
+    useEffect(() => {
+        validateToken(); // Validate on initial load
 
-    const intervalId = setInterval(validateToken, 15 * 60 * 1000); // Validate every 15 minutes
+        // Set interval to validate the token every 10 seconds
+        const intervalId = setInterval(validateToken, 10 * 1000);
 
-    return () => clearInterval(intervalId);
-    }, [isLoggedIn])
-  
+        // Listen for token changes in localStorage (for multi-tab scenarios)
+        const handleStorageChange = () => {
+            if (!localStorage.getItem('jwt')) {
+                setIsLoggedIn(false); // If the token is removed from another tab, log out
+            }
+        };
+
+        window.addEventListener('storage', handleStorageChange);
+
+        return () => {
+            clearInterval(intervalId); // Clean up interval
+            window.removeEventListener('storage', handleStorageChange); // Clean up storage listener
+        };
+    }, []);
+
+    // Handle login
     const handleLogin = async (email: string, password: string) => {
-      await login(email, password);
-      setIsLoggedIn(true);
+        await login(email, password);
+        setIsLoggedIn(true); // Set logged in state
+        validateToken(); // Validate the token immediately after login
     };
-  
+
+    // Handle logout
     const handleLogout = async () => {
-      await logout();
-      setIsLoggedIn(false);
+        await logout();
+        localStorage.removeItem('jwt'); // Clear the token from localStorage
+        setIsLoggedIn(false); // Set logged out state
+        setUserProfile(null); // Clear user profile
     };
-  
+
+    // Handle register
     const handleRegister = async (email: string, password: string) => {
-      await register(email, password);
-      setIsLoggedIn(true);
+        await register(email, password);
+        setIsLoggedIn(true); // Set logged in state
+        validateToken(); // Validate the token immediately after registration
     };
-  
+
     return (
-      <AuthContext.Provider value={{ userProfile, isLoggedIn, login: handleLogin, logout: handleLogout, register: handleRegister }}>
-        {children}
-      </AuthContext.Provider>
+        <AuthContext.Provider value={{ userProfile, isLoggedIn, login: handleLogin, logout: handleLogout, register: handleRegister }}>
+            {children}
+        </AuthContext.Provider>
     );
-  };
-  
-  const useAuth = () => {
+};
+
+// Hook to use the authentication context
+const useAuth = () => {
     const context = useContext(AuthContext);
     if (!context) {
-      throw new Error('useAuth must be used within an AuthProvider');
+        throw new Error('useAuth must be used within an AuthProvider');
     }
     return context;
-  };
-  
-  export { AuthProvider, useAuth };
+};
+
+export { AuthProvider, useAuth };

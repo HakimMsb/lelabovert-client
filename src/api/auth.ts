@@ -3,7 +3,7 @@ import { authenticationApiClient, removeJwtToken, setJwtToken } from './api-clie
 export const login = async (email: string, password: string) => {
     try {
         const response = await authenticationApiClient.login({ email, password });
-        const token = response.data.token;
+        const token = response.data.accessToken;
         if (token) {
             setJwtToken(token);
         }
@@ -16,7 +16,7 @@ export const login = async (email: string, password: string) => {
 export const register = async (email: string, password: string) => {
     try {
         const response = await authenticationApiClient.register({ email, password });
-        const token = response.data.token;
+        const token = response.data.accessToken;
         if(token){
             setJwtToken(token);
         }
