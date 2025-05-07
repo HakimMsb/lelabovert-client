@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { CartDto, CategoryDto, ChangePasswordRequest, CommuneDto, ProductDto, WilayaDto } from './lelabovert-api-generated-client/api';
 import { accountApiClient, algeriaCitiesApiClient, cartApiClient, categoryApiClient, customerApiClient, productApiClient } from './api-clients';
+import exp from 'constants';
 
 interface UseProductsResult {
   products: ProductDto[];
@@ -42,6 +43,23 @@ export interface UseSubmitProfileProps {
   commune: number,
   currentPassword: string,
   newPassword: string
+}
+
+interface UseAddToCartProps{
+  cartId: number,
+  productId: number,
+  quantity: number
+}
+
+interface UseRemoveFromCartProps{
+  cartId: number,
+  productId: number
+}
+
+interface UseUpdateProductQuantityInCartProps{
+  cartId: number,
+  productId: number,
+  quantity: number
 }
 
 export function useProducts(categorySlug?: string): UseProductsResult {
@@ -249,4 +267,49 @@ export function useCart() {
   }, []);
 
   return { cart, loading, error };
+}
+
+export function useAddToCart(){
+  const [error, setError] = useState<Error | null>(null);
+
+  const addToCart = async (props: UseAddToCartProps) => {
+    try {
+      await cartApiClient.addProductToCart(props.cartId, props.productId, props.quantity);
+    } catch (err) {
+      setError(err as Error);
+      console.error(err);
+    }
+  }
+
+  return { error, addToCart };
+}
+
+export function useRemoveFromCart(){
+  const [error, setError] = useState<Error | null>(null);
+
+  const removeFromCart = async (props: UseRemoveFromCartProps) => {
+    try {
+      await cartApiClient.deleteProductFromCart(props.cartId, props.productId);
+    } catch (err) {
+      setError(err as Error);
+      console.error(err);
+    }
+  }
+
+  return { error, removeFromCart };
+}
+
+export function useUpdateProductQuantityInCart(){
+  const [error, setError] = useState<Error | null>(null);
+
+  const updateProductQuantity = async (props: UseUpdateProductQuantityInCartProps) => {
+    try {
+      await cartApiClient.updateProductQuantity(props.cartId, props.productId, props.quantity);
+    } catch (err) {
+      setError(err as Error);
+      console.error(err);
+    }
+  }
+
+  return { error, updateProductQuantity };
 }

@@ -7,6 +7,7 @@ import styles from './cart.module.scss';
 import { CartOpenContext } from './cart-open-context';
 import Classnames from 'classnames';
 import { useCart } from '/src/api/api-client-hooks';
+import { useAuth } from '/src/api/auth-context';
 
 export interface CartProps {
     className?: string;
@@ -15,6 +16,7 @@ export interface CartProps {
 
 export const Cart = ({ className, initialIsOpen }: CartProps) => {
     const { isOpen, setIsOpen } = useContext(CartOpenContext);
+    const { userProfile } = useAuth();
     const { cart } = useCart();
     const isEmpty = !cart?.cartDetailDtos || cart.cartDetailDtos.length === 0;
 
@@ -24,15 +26,8 @@ export const Cart = ({ className, initialIsOpen }: CartProps) => {
         }
     }, [setIsOpen]);
 
-   // const wixClient = useContext(WixAPIContext);
-
     async function checkout() {
-       // const { success, url } = await wixClient.checkout();
-      //  if (success && url) {
-      //      window.location.href = url;
-      //  } else if (!success) {
             alert('checkout is not configured');
-      //  }
     }
 
     return (
@@ -48,7 +43,8 @@ export const Cart = ({ className, initialIsOpen }: CartProps) => {
                         <div className={styles.cart}>
                             <div className={styles.items}>
                                 {cart?.cartDetailDtos?.map((item) => (
-                                    <CartItem key={item.id} cartItem={item} />
+                                    <CartItem key={item.id} productId={item.productDto?.id} name={item.productDto?.name} imageUrl={item.productDto?.image}
+                                    price={item.productDto?.price} quantity={item.quantity} cartId={cart.id}/>
                                 ))}
                             </div>
                             <div className={styles['subtotal-checkout']}>

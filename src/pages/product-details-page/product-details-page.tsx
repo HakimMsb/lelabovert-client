@@ -5,15 +5,17 @@ import { RouteParams } from '../../router/config';
 import commonStyles from '../../styles/common-styles.module.scss';
 import { ProductImages } from './product-images/product-images';
 import { ProductInfo } from './product-info/product-info';
-import { useRef } from 'react';
-import { useProduct } from '../../api/api-client-hooks';
+import { useContext, useRef } from 'react';
+import { useAddToCart, useProduct } from '../../api/api-client-hooks';
+import { useAuth } from '/src/api/auth-context';
+import { CartOpenContext } from '/src/components/cart/cart-open-context';
 
 export interface ProductDetailsPageProps {
     className?: string;
 }
 
 export const ProductDetailsPage: React.FC<ProductDetailsPageProps> = ({ className }) => {
-    // const { setIsOpen } = useContext(CartOpenContext);
+    const { setIsOpen } = useContext(CartOpenContext);
     const { slug: productSlug } = useParams<RouteParams['/product/:slug']>();
 
     if (!productSlug) {
@@ -25,8 +27,9 @@ export const ProductDetailsPage: React.FC<ProductDetailsPageProps> = ({ classNam
     }
 
     const { product, loading, error } = useProduct(productSlug);
-    // const { trigger: addToCart } = useAddToCart();
+    const { error: addToCartError, addToCart} = useAddToCart();
     const quantityInput = useRef<HTMLInputElement>(null);
+    const { userProfile } = useAuth();
 
     if (!product) {
         return (
@@ -41,26 +44,18 @@ export const ProductDetailsPage: React.FC<ProductDetailsPageProps> = ({ classNam
     }
 
 
-    /*  async function addToCartHandler() {
-         if (!product?._id) {
+    async function addToCartHandler() {
+         if (!product?.id) {
              return;
          }
          const quantity = parseInt(quantityInput.current?.value || '1', 10);
-         const options: Record<string, string> = {};
-         //we are selecting here the first option for each product
-         //most products in the default store do not have options.
-         //but, for those who do, we need to specify the option value when we add to cart.
-         product.productOptions?.forEach((option) => {
-             if (option.name && option.choices?.length && option.choices[0].value) {
-                 options[option.name] =
-                     option.optionType === OptionType.color
-                         ? option.choices[0].description!
-                         : option.choices[0].value;
-             }
-         });
-         await addToCart({ id: product._id, quantity, options });
+
+         if (userProfile && userProfile.cartId !== undefined) {
+            await addToCart({ cartId: userProfile.cartId, productId: product.id, quantity: quantity });
+        }
+         
          setIsOpen(true);
-     } */
+     }
 
     return (
         <div className={classNames(styles.root, className)}>
@@ -87,7 +82,7 @@ export const ProductDetailsPage: React.FC<ProductDetailsPageProps> = ({ classNam
                         />
                     </label>
                     <button
-                        //onClick={addToCartHandler}
+                        onClick={addToCartHandler}
                         className={classNames(commonStyles.primaryButton, styles.addToCartBtn)}
                     >
                         Add to Cart

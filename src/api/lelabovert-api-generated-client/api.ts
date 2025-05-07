@@ -97,18 +97,6 @@ export interface Account {
     'enabled'?: boolean;
     /**
      * 
-     * @type {boolean}
-     * @memberof Account
-     */
-    'accountNonExpired'?: boolean;
-    /**
-     * 
-     * @type {boolean}
-     * @memberof Account
-     */
-    'credentialsNonExpired'?: boolean;
-    /**
-     * 
      * @type {string}
      * @memberof Account
      */
@@ -119,6 +107,18 @@ export interface Account {
      * @memberof Account
      */
     'authorities'?: Array<GrantedAuthority>;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof Account
+     */
+    'accountNonExpired'?: boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof Account
+     */
+    'credentialsNonExpired'?: boolean;
     /**
      * 
      * @type {boolean}
@@ -146,16 +146,22 @@ export interface AccountDto {
     'email'?: string;
     /**
      * 
-     * @type {Array<Role>}
+     * @type {Array<RoleDto>}
      * @memberof AccountDto
      */
-    'rolesSet'?: Array<Role>;
+    'rolesSet'?: Array<RoleDto>;
     /**
      * 
      * @type {CustomerDto}
      * @memberof AccountDto
      */
     'customerDto'?: CustomerDto;
+    /**
+     * 
+     * @type {number}
+     * @memberof AccountDto
+     */
+    'cartId'?: number;
 }
 /**
  * 
@@ -248,6 +254,50 @@ export interface AddOrUpdateCustomerRequest {
      * @memberof AddOrUpdateCustomerRequest
      */
     'accountId'?: number;
+}
+/**
+ * 
+ * @export
+ * @interface AddOrUpdateCustomerResponse
+ */
+export interface AddOrUpdateCustomerResponse {
+    /**
+     * 
+     * @type {CustomerDto}
+     * @memberof AddOrUpdateCustomerResponse
+     */
+    'customerDto'?: CustomerDto;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof AddOrUpdateCustomerResponse
+     */
+    'isCreated'?: boolean;
+}
+/**
+ * 
+ * @export
+ * @interface AddOrUpdateProductRequest
+ */
+export interface AddOrUpdateProductRequest {
+    /**
+     * 
+     * @type {string}
+     * @memberof AddOrUpdateProductRequest
+     */
+    'name'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof AddOrUpdateProductRequest
+     */
+    'description'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof AddOrUpdateProductRequest
+     */
+    'price'?: number;
 }
 /**
  * 
@@ -1339,10 +1389,10 @@ export interface RegistrationRequest {
     'password'?: string;
     /**
      * 
-     * @type {Array<Role>}
+     * @type {Array<RoleDto>}
      * @memberof RegistrationRequest
      */
-    'roles'?: Array<Role>;
+    'roles'?: Array<RoleDto>;
     /**
      * 
      * @type {number}
@@ -1368,6 +1418,25 @@ export interface Role {
      * @memberof Role
      */
     'name'?: string;
+}
+/**
+ * 
+ * @export
+ * @interface RoleDto
+ */
+export interface RoleDto {
+    /**
+     * 
+     * @type {number}
+     * @memberof RoleDto
+     */
+    'id'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof RoleDto
+     */
+    'roleName'?: string;
 }
 /**
  * 
@@ -1651,6 +1720,25 @@ export interface Token {
      * @memberof Token
      */
     'account'?: Account;
+}
+/**
+ * 
+ * @export
+ * @interface UpdateCategoryRequest
+ */
+export interface UpdateCategoryRequest {
+    /**
+     * 
+     * @type {string}
+     * @memberof UpdateCategoryRequest
+     */
+    'name'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof UpdateCategoryRequest
+     */
+    'description'?: string;
 }
 /**
  * 
@@ -2954,15 +3042,15 @@ export const CategoryControllerApiAxiosParamCreator = function (configuration?: 
         /**
          * 
          * @param {number} categoryId 
-         * @param {Category} category 
+         * @param {UpdateCategoryRequest} updateCategoryRequest 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        updateCategory: async (categoryId: number, category: Category, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        updateCategory: async (categoryId: number, updateCategoryRequest: UpdateCategoryRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'categoryId' is not null or undefined
             assertParamExists('updateCategory', 'categoryId', categoryId)
-            // verify required parameter 'category' is not null or undefined
-            assertParamExists('updateCategory', 'category', category)
+            // verify required parameter 'updateCategoryRequest' is not null or undefined
+            assertParamExists('updateCategory', 'updateCategoryRequest', updateCategoryRequest)
             const localVarPath = `/api/v1/admin/category/{categoryId}`
                 .replace(`{${"categoryId"}}`, encodeURIComponent(String(categoryId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
@@ -2983,7 +3071,7 @@ export const CategoryControllerApiAxiosParamCreator = function (configuration?: 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = serializeDataIfNeeded(category, localVarRequestOptions, configuration)
+            localVarRequestOptions.data = serializeDataIfNeeded(updateCategoryRequest, localVarRequestOptions, configuration)
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -3099,12 +3187,12 @@ export const CategoryControllerApiFp = function(configuration?: Configuration) {
         /**
          * 
          * @param {number} categoryId 
-         * @param {Category} category 
+         * @param {UpdateCategoryRequest} updateCategoryRequest 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async updateCategory(categoryId: number, category: Category, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CategoryDto>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.updateCategory(categoryId, category, options);
+        async updateCategory(categoryId: number, updateCategoryRequest: UpdateCategoryRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CategoryDto>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.updateCategory(categoryId, updateCategoryRequest, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['CategoryControllerApi.updateCategory']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -3179,12 +3267,12 @@ export const CategoryControllerApiFactory = function (configuration?: Configurat
         /**
          * 
          * @param {number} categoryId 
-         * @param {Category} category 
+         * @param {UpdateCategoryRequest} updateCategoryRequest 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        updateCategory(categoryId: number, category: Category, options?: any): AxiosPromise<CategoryDto> {
-            return localVarFp.updateCategory(categoryId, category, options).then((request) => request(axios, basePath));
+        updateCategory(categoryId: number, updateCategoryRequest: UpdateCategoryRequest, options?: any): AxiosPromise<CategoryDto> {
+            return localVarFp.updateCategory(categoryId, updateCategoryRequest, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -3263,13 +3351,13 @@ export class CategoryControllerApi extends BaseAPI {
     /**
      * 
      * @param {number} categoryId 
-     * @param {Category} category 
+     * @param {UpdateCategoryRequest} updateCategoryRequest 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof CategoryControllerApi
      */
-    public updateCategory(categoryId: number, category: Category, options?: RawAxiosRequestConfig) {
-        return CategoryControllerApiFp(this.configuration).updateCategory(categoryId, category, options).then((request) => request(this.axios, this.basePath));
+    public updateCategory(categoryId: number, updateCategoryRequest: UpdateCategoryRequest, options?: RawAxiosRequestConfig) {
+        return CategoryControllerApiFp(this.configuration).updateCategory(categoryId, updateCategoryRequest, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -3344,7 +3432,7 @@ export const CustomerControllerApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async addOrUpdateCustomer(addOrUpdateCustomerRequest: AddOrUpdateCustomerRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CustomerDto>> {
+        async addOrUpdateCustomer(addOrUpdateCustomerRequest: AddOrUpdateCustomerRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<AddOrUpdateCustomerResponse>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.addOrUpdateCustomer(addOrUpdateCustomerRequest, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['CustomerControllerApi.addOrUpdateCustomer']?.[localVarOperationServerIndex]?.url;
@@ -3366,7 +3454,7 @@ export const CustomerControllerApiFactory = function (configuration?: Configurat
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        addOrUpdateCustomer(addOrUpdateCustomerRequest: AddOrUpdateCustomerRequest, options?: any): AxiosPromise<CustomerDto> {
+        addOrUpdateCustomer(addOrUpdateCustomerRequest: AddOrUpdateCustomerRequest, options?: any): AxiosPromise<AddOrUpdateCustomerResponse> {
             return localVarFp.addOrUpdateCustomer(addOrUpdateCustomerRequest, options).then((request) => request(axios, basePath));
         },
     };
@@ -3923,15 +4011,15 @@ export const ProductControllerApiAxiosParamCreator = function (configuration?: C
         /**
          * 
          * @param {number} categoryId 
-         * @param {Product} product 
+         * @param {AddOrUpdateProductRequest} addOrUpdateProductRequest 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        addProduct: async (categoryId: number, product: Product, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        addProduct: async (categoryId: number, addOrUpdateProductRequest: AddOrUpdateProductRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'categoryId' is not null or undefined
             assertParamExists('addProduct', 'categoryId', categoryId)
-            // verify required parameter 'product' is not null or undefined
-            assertParamExists('addProduct', 'product', product)
+            // verify required parameter 'addOrUpdateProductRequest' is not null or undefined
+            assertParamExists('addProduct', 'addOrUpdateProductRequest', addOrUpdateProductRequest)
             const localVarPath = `/api/v1/admin/category/{categoryId}/product`
                 .replace(`{${"categoryId"}}`, encodeURIComponent(String(categoryId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
@@ -3952,7 +4040,7 @@ export const ProductControllerApiAxiosParamCreator = function (configuration?: C
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = serializeDataIfNeeded(product, localVarRequestOptions, configuration)
+            localVarRequestOptions.data = serializeDataIfNeeded(addOrUpdateProductRequest, localVarRequestOptions, configuration)
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -4249,15 +4337,15 @@ export const ProductControllerApiAxiosParamCreator = function (configuration?: C
         /**
          * 
          * @param {number} productId 
-         * @param {Product} product 
+         * @param {AddOrUpdateProductRequest} addOrUpdateProductRequest 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        updateProduct: async (productId: number, product: Product, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        updateProduct: async (productId: number, addOrUpdateProductRequest: AddOrUpdateProductRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'productId' is not null or undefined
             assertParamExists('updateProduct', 'productId', productId)
-            // verify required parameter 'product' is not null or undefined
-            assertParamExists('updateProduct', 'product', product)
+            // verify required parameter 'addOrUpdateProductRequest' is not null or undefined
+            assertParamExists('updateProduct', 'addOrUpdateProductRequest', addOrUpdateProductRequest)
             const localVarPath = `/api/v1/admin/products/{productId}`
                 .replace(`{${"productId"}}`, encodeURIComponent(String(productId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
@@ -4278,7 +4366,7 @@ export const ProductControllerApiAxiosParamCreator = function (configuration?: C
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = serializeDataIfNeeded(product, localVarRequestOptions, configuration)
+            localVarRequestOptions.data = serializeDataIfNeeded(addOrUpdateProductRequest, localVarRequestOptions, configuration)
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -4335,12 +4423,12 @@ export const ProductControllerApiFp = function(configuration?: Configuration) {
         /**
          * 
          * @param {number} categoryId 
-         * @param {Product} product 
+         * @param {AddOrUpdateProductRequest} addOrUpdateProductRequest 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async addProduct(categoryId: number, product: Product, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ProductDto>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.addProduct(categoryId, product, options);
+        async addProduct(categoryId: number, addOrUpdateProductRequest: AddOrUpdateProductRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ProductDto>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.addProduct(categoryId, addOrUpdateProductRequest, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['ProductControllerApi.addProduct']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -4443,12 +4531,12 @@ export const ProductControllerApiFp = function(configuration?: Configuration) {
         /**
          * 
          * @param {number} productId 
-         * @param {Product} product 
+         * @param {AddOrUpdateProductRequest} addOrUpdateProductRequest 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async updateProduct(productId: number, product: Product, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ProductDto>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.updateProduct(productId, product, options);
+        async updateProduct(productId: number, addOrUpdateProductRequest: AddOrUpdateProductRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ProductDto>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.updateProduct(productId, addOrUpdateProductRequest, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['ProductControllerApi.updateProduct']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -4479,12 +4567,12 @@ export const ProductControllerApiFactory = function (configuration?: Configurati
         /**
          * 
          * @param {number} categoryId 
-         * @param {Product} product 
+         * @param {AddOrUpdateProductRequest} addOrUpdateProductRequest 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        addProduct(categoryId: number, product: Product, options?: any): AxiosPromise<ProductDto> {
-            return localVarFp.addProduct(categoryId, product, options).then((request) => request(axios, basePath));
+        addProduct(categoryId: number, addOrUpdateProductRequest: AddOrUpdateProductRequest, options?: any): AxiosPromise<ProductDto> {
+            return localVarFp.addProduct(categoryId, addOrUpdateProductRequest, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -4563,12 +4651,12 @@ export const ProductControllerApiFactory = function (configuration?: Configurati
         /**
          * 
          * @param {number} productId 
-         * @param {Product} product 
+         * @param {AddOrUpdateProductRequest} addOrUpdateProductRequest 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        updateProduct(productId: number, product: Product, options?: any): AxiosPromise<ProductDto> {
-            return localVarFp.updateProduct(productId, product, options).then((request) => request(axios, basePath));
+        updateProduct(productId: number, addOrUpdateProductRequest: AddOrUpdateProductRequest, options?: any): AxiosPromise<ProductDto> {
+            return localVarFp.updateProduct(productId, addOrUpdateProductRequest, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -4593,13 +4681,13 @@ export class ProductControllerApi extends BaseAPI {
     /**
      * 
      * @param {number} categoryId 
-     * @param {Product} product 
+     * @param {AddOrUpdateProductRequest} addOrUpdateProductRequest 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof ProductControllerApi
      */
-    public addProduct(categoryId: number, product: Product, options?: RawAxiosRequestConfig) {
-        return ProductControllerApiFp(this.configuration).addProduct(categoryId, product, options).then((request) => request(this.axios, this.basePath));
+    public addProduct(categoryId: number, addOrUpdateProductRequest: AddOrUpdateProductRequest, options?: RawAxiosRequestConfig) {
+        return ProductControllerApiFp(this.configuration).addProduct(categoryId, addOrUpdateProductRequest, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -4693,13 +4781,13 @@ export class ProductControllerApi extends BaseAPI {
     /**
      * 
      * @param {number} productId 
-     * @param {Product} product 
+     * @param {AddOrUpdateProductRequest} addOrUpdateProductRequest 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof ProductControllerApi
      */
-    public updateProduct(productId: number, product: Product, options?: RawAxiosRequestConfig) {
-        return ProductControllerApiFp(this.configuration).updateProduct(productId, product, options).then((request) => request(this.axios, this.basePath));
+    public updateProduct(productId: number, addOrUpdateProductRequest: AddOrUpdateProductRequest, options?: RawAxiosRequestConfig) {
+        return ProductControllerApiFp(this.configuration).updateProduct(productId, addOrUpdateProductRequest, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

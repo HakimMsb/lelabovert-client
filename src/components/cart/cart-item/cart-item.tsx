@@ -1,46 +1,55 @@
 import classNames from 'classnames';
 import styles from './cart-item.module.scss';
-import { cart } from '@wix/ecom';
+
 import { ChangeEvent } from 'react';
 import commonStyles from '../../../styles/common-styles.module.scss';
 import { Cross2Icon } from '@radix-ui/react-icons';
+import { useRemoveFromCart, useUpdateProductQuantityInCart } from '/src/api/api-client-hooks';
 
 export interface CartItemProps {
     className?: string;
     isLast?: boolean;
-    cartItem: cart.LineItem;
+    name?: string;
+    imageUrl?: string;
+    price?: number;
+    quantity?: number;
+    cartId?: number;
+    productId?: number;
 }
 
-export const CartItem = ({ cartItem, className, isLast }: CartItemProps) => {
-    const name = cartItem.productName?.translated || '';
-    //const imageUrl = getImageHttpUrl(cartItem.image, 120, 120);
+export const CartItem = ({ productId, name, imageUrl, price, quantity, cartId, className, isLast }: CartItemProps) => {
 
-    //const { trigger: updateQuantity } = useUpdateCartItemQuantity();
-    //const { trigger: removeItem } = useRemoveItemFromCart();
+    const { error: updateProductQuantityError, updateProductQuantity } = useUpdateProductQuantityInCart();
+    const { error: removeFromCartError, removeFromCart} = useRemoveFromCart();
 
-    function updateQuantityHandler(e: ChangeEvent<HTMLInputElement>) {
-        if (!cartItem._id) {
-            return;
+    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
+
+    async function updateQuantityHandler(e: ChangeEvent<HTMLInputElement>) {
+        if(cartId !== undefined && productId !== undefined){
+            await updateProductQuantity({cartId: cartId, productId: productId, quantity: parseInt(e.target.value)});
+
         }
-        const newQuantity = parseInt(e.target.value, 10);
-        if (newQuantity > 0) {
-            //updateQuantity({ id: cartItem._id, quantity: newQuantity });
+    }
+        
+    async function removeFromCartHandler(){
+        if(cartId !== undefined && productId !== undefined){
+            await removeFromCart({cartId: cartId, productId: productId});
         }
     }
 
     return (
         <div className={classNames(styles.root, { [styles.divider]: !isLast }, className)}>
-            <img alt={name || ''} className={styles.image} />
+            <img src={`${apiBaseUrl}/api/v1/public/product/image/${imageUrl}`} alt={name || ''} className={styles.image} />
             <div className={styles.infoContainer}>
                 <div className={styles['item-line']}>
                     <div>
                         <h4 className={styles.description}>{name}</h4>
                         <span className={commonStyles.price}>
-                            {cartItem.price?.formattedConvertedAmount}
+                            {price}
                         </span>
                     </div>
                     <button
-                       // onClick={() => removeItem(cartItem._id!)}
+                        onClick={removeFromCartHandler}
                         aria-label="Remove item"
                         className={styles.remove}
                     >
@@ -51,7 +60,7 @@ export const CartItem = ({ cartItem, className, isLast }: CartItemProps) => {
                 <div className={styles.actionsContainer}>
                     <input
                         type="number"
-                        value={cartItem.quantity}
+                        value={quantity}
                         onChange={updateQuantityHandler}
                         min={0}
                         className={commonStyles.numberInput}
